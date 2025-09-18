@@ -30,10 +30,13 @@ pipeline{
             slackSend(
                 channel: '#harry_ip1',
                 color: 'good',
-                message: ":rocket: *Deployment successful!* `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n" +
-                         "• Render: ${env.RENDER_URL}\n" +
-                         "• Build: ${env.BUILD_URL}"
-            )
+                message: """:rocket: *Deployment successful!*
+                *Job:* `${env.JOB_NAME}`
+                *Build ID:* #${env.BUILD_NUMBER}
+                *Render:* <${env.RENDER_URL}|Open site>
+                *Build URL:* <${env.BUILD_URL}|Open build>
+                """.stripIndent()
+                )
         }
         failure {
             script {
