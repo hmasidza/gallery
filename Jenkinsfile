@@ -27,19 +27,36 @@ pipeline{
     }
     post {
         failure {
-            emailext(
-                to: 'harry.masidza@student.moringaschool.com',
-                subject: "[CI] ${env.JOB_NAME} – Build #${env.BUILD_NUMBER} FAILED",
-                body: """
-                Greetings,<br><br>
-                Build has <b>FAILED</b>.<br><br>
-                • <b>Name of Job:</b> ${env.JOB_NAME}<br>
-                • <b>Build Number:</b> #${env.BUILD_NUMBER}<br>
-                • <b>Branch Name:</b> ${env.BRANCH_NAME ?: 'N/A'}<br>
-                • <b>URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a><br><br>
-                """,
-                mimeType: 'text/html'
-            )
+            script {
+                retry(3) {
+                    waitUntil {
+                        try {
+                            emailext(
+                                to: 'harry.masidza@student.moringaschool.com',
+                                subject: "[CI] ${env.JOB_NAME} – Build #${env.BUILD_NUMBER} FAILED",
+                                body: """
+                                Greetings,<br><br>
+                                Build has <b>FAILED</b>.<br><br>
+                                • <b>Job Name:</b> ${env.JOB_NAME}<br>
+                                • <b>Build Number:</b> #${env.BUILD_NUMBER}<br>
+                                • <b>Branch:</b> ${env.GIT_BRANCH ?: 'master'}<br>
+                                • <b>Build URL:</b> <a href="${env.BUILD_URL}">View Build</a><br><br>
+                                """,
+                                mimeType: 'text/html'
+                            )
+                            echo "Failure email sent successfully!"
+                            return true
+                        } catch (Exception e) {
+                            echo "Email attempt failed: ${e.getMessage()}. Retrying in 10 seconds..."
+                            sleep(10)
+                            return false
+                        }
+                    }
+                }
+            }
+        }
+        always {
+            echo "Build completed with status: ${currentBuild.currentResult}"
         }
     }
 }
