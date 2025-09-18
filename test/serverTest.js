@@ -10,8 +10,6 @@ var expect = chai.expect;
 chai.use(chaiHttp);
 
 describe('Photos', function(){
-
-
     it('should list ALL photos on / GET', function(done){
         this.timeout(60000);
         chai.request(server)
